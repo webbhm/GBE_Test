@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<head>
+ <title>GBE_T Index</title>
+ <meta http-equiv="refresh" content="3600">
+</head>
+<body>
+www
+<h1>GBE_T (Growing Beyond Earth - Test)</h1></br>
+
+<p>Having problems at the moment getting NGINX and Flask to work together nicely, what appears to be a good url is not getting passed through</p>
+<p>For now, cut and paste these urls to see the charts:
+<ul>
+<li>openagbloom.ddns.net/gbe_t/temp_chart</li>
+<li>openagbloom.ddns.net/gbe_t/humidity_chart</li>
+<li>openagbloom.ddns.net/gbe_t/pressure_chart</li>
+<li>openagbloom.ddns.net/gbe_t/co2_chart</li>
+</ul>
+
+<h3>Not Working: {{url_for('temp_chart')}}</h3>
+<p>Can open, then type in missing '/gbe_t' and see page</p>
+<a href={{url_for('temp_chart')}}>Temp Chart</a></br>
+<a href={{url_for('humidity_chart')}}>Humidity Chart</a></br>
+<a href={{url_for('pressure_chart')}}>Pressure Chart</a></br>
+<a href={{url_for('co2_chart')}}>CO2 Chart</a></br>
+
+<h3>Not Working: https://www.openagbloom.ddns.net/gbe_t/temp_chart</h3>
+<a href='https://www.openagbloom.ddns.net/gbe_t/temp_chart'>Temp Chart</a></br>
+<a href='https://www.openagbloom.ddns.net/gbe_t/humidity_chart'>Humidity Chart</a></br>
+<a href='https://www.openagbloom.ddns.net/gbe_t/pressure_chart'>Pressure Chart</a></br>
+<a href='https://www.openagbloom.ddns.net/gbe_t/co2_chart'>CO2 Chart</a></br>
+     
+</body>
+</html> 

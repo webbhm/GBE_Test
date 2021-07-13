@@ -15,7 +15,7 @@ from datetime import datetime
 from bson.json_util import dumps, loads
 
 # logon string to get into the database
-url = 'mongodb+srv://webbhm:sHzHKD9_vZUGCZ4@gbe-d.cc79x.mongodb.net/test'
+url = 'mongodb+srv://<.........>x.mongodb.net/test'
 
 # Source directories for data files, not used here
 DIR = "/home/pi/python/Mongo/"

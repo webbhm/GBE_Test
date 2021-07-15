@@ -67,6 +67,7 @@ class ChartHelper(object):
            "subject.attribute.name":self._attribute
          }}
         #print(match)
+        
         query = [match]
         
         mu = MongoUtil()    
@@ -138,7 +139,8 @@ class ChartHelper(object):
                 "$zip":{"inputs":["$Measurments.name", "$Measurments.value"]}
                 }}}}      
         #print(match)
-        query = [match, group, project]
+        sort = {"$sort":{"_id.Time":1}}                
+        query = [match, group, project, sort]
         
         mu = MongoUtil()    
         recs = mu.aggregate2(DB, COL, query) 

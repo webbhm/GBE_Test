@@ -37,12 +37,26 @@ class ChartHelper(object):
         self._trial = None
         self._attribute = attribute
         self._start_date = 0
+        # load the above variables with stock values for this trial
         self.get_trial()
-    
 
+    def get_trial(self):
+        # Get the stock trial attributes used in all queries
+        from trial import trial
+        self._farm = trial["location"]["farm"]
+        self._field = trial["location"]["field"]
+        self._trial = trial["name"]
+        # multiply for MongoDB milliseconds
+        self._start_date = int(trial["time"]["start_date"]) * 1000
+    
+    #----------------- Single Attribute Reporting ---------------------
     def get_data(self):
         '''
         Run Mongo to get data
+        This is a single attribute retreival
+        Used for Temperature, Humidity or Pressure charting
+        The attribute is passed in when the object is created.
+        Now that have added multi-attribute reports, this may not be the best architecture.
         '''
         match = {"$match":{
            "location.farm":self._farm,
@@ -60,44 +74,39 @@ class ChartHelper(object):
         return recs
     
     def json_to_array(self, recs):
+        '''
+        convert the MongoDB JSON structures to an array for passing into Chart.js
+        '''
         data = {}
         date = []
         value = []
         for rec in recs:
+            # loop all records and dump into array structures
             ts = rec["time"]["timestamp"]
             date.append(ts)
             v = rec["subject"]["attribute"]["value"]
             value.append(v)
             #print(ts, v)
-
-            
+        # Build the data array structure from the parts
         data["date"] = date
         data["value"] = value
         data["title"] = self._attribute
         data["farm"] = self._farm
         data["field"] = self._field
         return data
-            
-        
-    
-    def get_trial(self):
-        from trial import trial
-        self._farm = trial["location"]["farm"]
-        self._field = trial["location"]["field"]
-        self._trial = trial["name"]
-        # multiply for MongoDB milliseconds
-        self._start_date = int(trial["time"]["start_date"]) * 1000
-        #self._subject = "Air"
-        #self._attribute = "Temperature"
-        #self._label = "Temperature"
-        #self._units = "C"
-        #self._file_name = "/home/pi/python/static/temp_chart.svg"
         
     def get_array(self):
+        '''
+        High level function to wrapper the low level parts
+        This gets called by Flask
+        '''
         recs = self.get_data()
         data = self.json_to_array(recs)
         return data
     
+    #------------ Multi attribute (Temperature and Humidity) -----------
+    # Used for dewpoint and vapor pressure deficit reporting
+
     def get_multi_data(self, attributes):
         '''
         Run Mongo to get multiple attributes in one query
@@ -136,12 +145,19 @@ class ChartHelper(object):
         return recs
     
     def get_dewpoint_array(self):
+        '''
+        High level function for Dewpoint reporting
+        Called by Flask
+        '''
         attrs = ["Temperature", "Humidity"]
         recs = self.get_multi_data(attrs)
         data = self.dewpoint_array(recs)
         return data
     
     def dewpoint_array(self, recs):
+        '''
+        Convert JSON records into a Temperature, Humidity, Dewpoint array
+        '''
         from DewPoint import getDewPoint
         data = {}
         date = []
@@ -157,14 +173,14 @@ class ChartHelper(object):
                 t.append(temp)
                 hum = rec["Measurments"]["Humidity"]
                 h.append(hum)
+                # calculate dewpoint here
                 dewpoint = getDewPoint(temp, hum)
                 d.append(round(dewpoint, 2))
                 #print(ts, temp, hum, dewpoint)
             except Exception as e:
+                # this catches situations where Temperature or Humidity are missing
                 print(e)
-            
-
-            
+        # Build the data structure from the parts
         data["date"] = date
         data["temperature"] = t
         data["humidity"] = h
@@ -175,14 +191,19 @@ class ChartHelper(object):
         return data
     
     def get_vpd_array(self):
-        # build vapor pressure deficite data for chart
+        '''
+        build vapor pressure deficite data for chart
+        high level function called by Flask
+        '''
         attrs = ["Temperature", "Humidity"]
         recs = self.get_multi_data(attrs)
         data = self.vpd_array(recs)
         return data        
         
     def vpd_array(self, recs):
-        # convert json to array
+        '''
+        convert json to array of Temperature, Humidity and VPD
+        '''
         from VaporPressure import main
         data = {}
         date = []
@@ -203,7 +224,7 @@ class ChartHelper(object):
                 #print(ts, temp, hum, dewpoint)
             except Exception as e:
                 print(e)
-            
+        # build data structure from parts            
         data["date"] = date
         data["temperature"] = t
         data["humidity"] = h
@@ -213,9 +234,7 @@ class ChartHelper(object):
         data["field"] = self._field
         return data
 
-                
-        
-
+#------------- Test functions to exercise the above code -----------                
 def test():
     ''' Function to test the chart building with test flag set to True
            Args:
@@ -240,6 +259,9 @@ def test():
     print("Done")
     
 def test2():
+    '''
+    Test the humidity chart data function
+    '''
     attribute = HUMIDITY
     print("Test Data:", attribute)
     tc = ChartHelper(attribute)
@@ -248,7 +270,10 @@ def test2():
     print("Done")
     
 def test3():
-    
+    '''
+    Dewpoint
+    exercise the individual parts
+    '''
     attributes = ["Temperature", "Humidity"]
     print("Test Multi Data:", attributes)
     tc = ChartHelper()

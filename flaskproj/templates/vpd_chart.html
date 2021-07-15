@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<body>
+<h1>Vapor Pressure Deficite Chart</h1>
+<p>Farm: {{data.farm}}</p>
+<p>Field: {{data.field}}</p>
+<p>Ver: 0.0</p>
+<p>Test of charting with Chart.js</p>
+
+<canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+
+
+<script>
+var xValues = {{data.date}};
+var yValues = {{data.temperature}};
+var y2Values = {{data.humidity}};
+var y3Values = {{data.vpd}};
+
+new Chart("myChart", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      label: 'Temperature',
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: yValues,
+      //yAxisID: 'y',
+    },
+  {
+      label: 'Humidity',
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,255,0,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: y2Values,
+      yAxisID: 'y',
+    },
+  {
+      label: 'Dewpoint',
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(255,0,0,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: y3Values,
+      yAxisID: 'y1',
+    }]
+  },
+   options: {
+       responsive: true,
+       interaction: {
+          mode: 'index',
+          intersect: false,
+       },
+       stacked: false,
+       plugins: {
+         title: {
+           display: true,
+           text: 'Two axis dewpoint chart',
+         },
+       },
+       scales: {
+	 yAxes: [{ticks: {min: 15, max:100}}],
+         y: {
+           //label: 'percent',
+           type: 'linear',
+           display: true,
+           position: 'left',
+           },
+         y1: {
+           //label: 'Temp C',
+           type: 'linear',
+           display: true,
+           position: 'right',
+           grid: {
+             drawOnChartArea: false, // only want for one axis
+           }, //grid
+         }, // y1
+       }, // scales
+   }, // options
+}  // chart
+);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {font-family: "Lato", sans-serif;}
+
+/* Style the tab */
+div.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+div.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+div.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+div.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+</style>
+<head>
+ <title>MVP - Dev</title>
+ <meta http-equiv="refresh" content="3600">
+</head>
+<body>
+
+<h1>GBE_T (Growing Beyond Earth - Test)</h1>
+<p>Click on a tab to display</p>
+
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Temperature')">Temperature</button>
+  <button class="tablinks" onclick="openTab(event, 'Humidity')">Humidity</button>
+  <button class="tablinks" onclick="openTab(event, 'Dewpoint')">Dewpoint</button>
+  <button class="tablinks" onclick="openTab(event, 'VaporPressure')">Vapor Pressure</button>
+  <button class="tablinks" onclick="openTab(event, 'Lux')">Lux</button>
+  <button class="tablinks" onclick="openTab(event, 'Conductivity')">Electrical Conductivity</button>
+  <button class="tablinks" onclick="openTab(event, 'CO2')">CO2</button>
+  <button class="tablinks" onclick="openTab(event, 'Camera')">Camera</button>
+  <button class="tablinks" onclick="openTab(event, 'GIF')">GIF</button>
+  <button class="tablinks" onclick="openTab(event, 'NDVI')">NDVI</button>
+  <button class="tablinks" onclick="openTab(event, 'NDVI_GIF')">NDVI GIF</button>
+  <button class="tablinks" onclick="openTab(event, 'About')">About</button>
+</div>
+
+<div id="Temperature" class="tabcontent">
+  <h3>Temperature</h3>
+    <object id="tempChartImage" type="image/svg+xml" data="temp_chart.svg">
+	"SVGA not supported or no file found"
+    </object>
+</div>
+
+<div id="Humidity" class="tabcontent">
+  <h3>Humidity</h3>
+    <object id="humidityChartImage" type="image/svg+xml" data="humidity_chart.svg"/>
+	"Your browser does not support SVG"
+    </object>
+</div>
+
+<div id="Dewpoint" class="tabcontent">
+  <h3>Dewpoint</h3>
+  <p>Dewpoint is calculated from temperature and humidity data</p>
+    <object id="Dewpoint_Chart" type="image/svg+xml" data="dewpoint_chart.svg"/>
+	No data available
+    </object>
+</div>
+
+<div id="Lux" class="tabcontent">
+  <h3>Lux</h3>
+    <object id="LUX_Chart" type="image/svg+xml" data="lux_chart.svg"/>
+	No data available
+    </object>
+</div>
+
+<div id="VaporPressure" class="tabcontent">
+  <h3>Vapor Pressure Deficit</h3>
+  <p>Calculation of VPD from Temperature and Humidity</p>
+    <object id="VPD_Chart" type="image/svg+xml" data="vpd_chart.svg"/>
+	No data available
+    </object>
+</div>
+
+<div id="Conductivity" class="tabcontent">
+  <h3>Electrical Conductivity</h3>
+  <p>Moisture sensor used to measure water level</p>
+    <object id="EC_Chart" type="image/svg+xml" data="ec_chart.svg"/>
+	No data available
+    </object>
+</div>
+
+<div id="CO2" class="tabcontent">
+  <h3>CO2 Concentration</h3>
+  <p>Reading of CO2 among the plants</p>
+    <object id="CO2_Chart" type="image/svg+xml" data="co2_chart.svg"/>
+	No data available
+    </object>
+</div>
+
+
+<div id="Camera" class="tabcontent">
+  <h3>Camera</h3>
+  <p>Latest picture goes here.</p>
+  <p>
+  <img id="latestCameraImage" src="image.jpg" alt="Latest MVP image" style="width:640px;height:480px;">
+  </p>
+</div>
+
+<div id="NDVI" class="tabcontent">
+  <h3>NDVI Image</h3>
+  <p>Composite of original, NDVI, mixed channels spectral mapping of NDVI.</p>
+  <object id="NDVIimage" src="ndir.jpg" alt="Latest NDVI image" style="width:640px;height:480px;">
+	Image not available
+  </object>
+</div>
+
+<div id="About" class="tabcontent">
+  <h3>About</h3>
+  <p>Current Version: 0.0</p>
+  <p>This is a rebuild of the GBE-D (Growing Beyond Earth - Digital) box which was designed for stand-alone use without internet access.  The screen code has been stripped out, though the LED light pannel control remains.  Sensors are re-wired for MongoDB storage and sending to MQTT.  This version assumes internet access for cloud storage of data (MongoDB) and MQTT activities.  There is a Flask website set up to give a view into the box.  Current website is a modification of the MVP website.</p>
+  <p>Documentation can be found at:
+  <a href="http://www.github.com/webbhm/GBE_Test/wiki">GBE_T wiki</a>
+</p>
+</div>
+
+<div id="NDVI_GIF" class="tabcontent">
+  <h3>GIF</h3>
+  <p>Composite NDVI gif movie since start of trial</p>
+  <object id="NVDIgif" type="image/svg+xml" data="MAP.gif" alt="GIF movie since start of trial" style="width:640px;height:480px;"/>
+</div>
+
+<div id="GIF" class="tabcontent">
+  <h3>GIF</h3>
+  <p>Composite gif movie since start of trial</p>
+  <p>
+  <object id="gifSequence" type="image/svg+xml" data="plant.gif" alt="GIF movie since start of trial" style="width:640px;height:480px;"/>
+  </p>
+</div>
+
+<script>
+function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+function updateImages() {
+    var randomNumber = getRandomNumber(1000000000, 9999999999);
+
+    // ask for the images with a random query string so the browser doesn't use a cached image.
+
+    document.getElementById("tempChartImage")
+	    .setAttribute('data', 'temp_chart.svg?' + randomNumber);
+
+    document.getElementById("humidityChartImage")
+	    .setAttribute('data', 'humidity_chart.svg?' + randomNumber);
+
+    document.getElementById("Dewpoint_Chart")
+	    .setAttribute('data', 'dewpoint_chart.svg?' + randomNumber);
+
+    document.getElementById("VPD_Chart")
+	    .setAttribute('data', 'vpd_chart.svg?' + randomNumber);
+
+    document.getElementById("EC_Chart")
+	    .setAttribute('data', 'ec_chart.svg?' + randomNumber);
+
+    document.getElementById("CO2_Chart")
+	    .setAttribute('data', 'co2_chart.svg?' + randomNumber);
+
+    document.getElementById("latestCameraImage")
+	    .setAttribute('data', 'image.jpg?' + randomNumber);
+
+    document.getElementById("LUX_Chart")
+	    .setAttribute('data', 'lux_chart.svg?' + randomNumber);
+
+    document.getElementById("gifSequence")
+	    .setAttribute('data', 'plant.gif?' + randomNumber);
+
+    document.getElementById("NDVIimage")
+	    .setAttribute('data', 'ndir.jpg?' + randomNumber);
+}
+
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+
+    updateImages();
+
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+</script>
+     
+</body>
+</html> 

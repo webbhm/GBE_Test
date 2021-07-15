@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<head>
+ <title>Pressure Chart</title>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<body>
+
+<h1>Pressure Chart</h1>
+<p>Farm: {{data.farm}}</p>
+<p>Field: {{data.field}}</p>
+<p>Test of charting with Chart.js</p>
+<p>ver: 0.1</p>
+<div>
+<p>Top of chart</p>
+<canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+<p>Bottom of chart</p>
+</div>
+<script>
+var xValues = {{data.date}};
+var yValues = {{data.value}};
+
+new Chart("myChart", {
+  type: "line",
+  data: {
+    labels: xValues,
+    datasets: [{
+      fill: false,
+      lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: yValues
+    }]
+  },
+  options: {
+    legend: {display: false},
+    scales: {
+      yAxes: [{ticks: {min: 800, max:1200}}],
+    }
+  }
+});
+</script>
+</body>
+</html> 

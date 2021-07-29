@@ -43,11 +43,17 @@ class ChartHelper(object):
     def get_trial(self):
         # Get the stock trial attributes used in all queries
         from trial import trial
+        self._location = trial["location"]
+        self._time = trial["time"]
         self._farm = trial["location"]["farm"]
         self._field = trial["location"]["field"]
         self._trial = trial["name"]
         # multiply for MongoDB milliseconds
         self._start_date = int(trial["time"]["start_date"]) * 1000
+        
+    def get_location(self):
+        return self._location
+        
     
     #----------------- Single Attribute Reporting ---------------------
     def get_data(self):
@@ -139,8 +145,13 @@ class ChartHelper(object):
                 "$zip":{"inputs":["$Measurments.name", "$Measurments.value"]}
                 }}}}      
         #print(match)
-        sort = {"$sort":{"_id.Time":1}}                
+        # get first 20 records - use for test data
+        limit = {"$limit":20}
+        # sort results in date order
+        sort = {"$sort":{"_id.Time":1}}
+        
         query = [match, group, project, sort]
+        #query = [match, group, project, sort, limit]        
         
         mu = MongoUtil()    
         recs = mu.aggregate2(DB, COL, query) 
@@ -235,6 +246,65 @@ class ChartHelper(object):
         data["farm"] = self._farm
         data["field"] = self._field
         return data
+    
+#------------- Germination statistics -------------------------
+    def get_germination(self):
+        from MongoUtil import Germination
+        recs = Germination()
+        data = {}
+        plot = []
+        for rec in recs:
+            p = rec["plot"]
+            plot.append(p)
+        data["location"] = self._location
+        data["time"] = self._time
+        data["title"] = "Germination"
+        data["trial"] = self._trial
+        data["rec"] = plot
+        return data
+    
+#------------- Planting statistics -------------------------
+    def get_planting(self):
+        from MongoUtil import Planting
+        recs = Planting()
+        data = {}
+        plot = []
+        name = []
+        dt = []
+        dts = []
+        total = []
+        for rec in recs:
+            p = rec["_id"]["Plot"]
+            plot.append(p)
+            name.append(rec["_id"]["type"])
+            d = rec["planting_date"]
+            dt.append(d)
+            ds = datetime.fromtimestamp(rec["planting_date"]/1000).strftime("%Y-%m-%d %H:%M:%S")
+            dts.append(ds)
+            t = rec["seeds_planted"]
+            total.append(t)
+            
+        data["location"] = self._location
+        data["time"] = self._time
+        data["title"] = "Germination"
+        data["trial"] = self._trial
+        data["plot"] = plot
+        data["name"] = name
+        data["timestamp"] = dt
+        data["date_str"] = dts
+        data["total"] = total
+        return data
+    
+    
+#------------- Growth Rate -------------------------
+    def get_growth(self):
+        
+        data = {}
+        data["location"] = self._location
+        data["time"] = self._time
+        data["title"] = "Germination"
+        data["trial"] = self._trial
+        return data    
 
 #------------- Test functions to exercise the above code -----------                
 def test():
@@ -247,14 +317,14 @@ def test():
                None
     '''
     print("Temp Chart Test")    
-    tc = ChartHelper()
-    recs = tc.get_data(TEMPERATURE)
+    tc = ChartHelper(TEMPERATURE)
+    recs = tc.get_data()
     #print("Recs", recs)
     #for rec in recs:
     #    print(rec)
-    data = tc.json_to_array(TEMPERATURE, recs)
+    data = tc.json_to_array(recs)
     print("Rec cnt", len(data["date"]))    
-    #print(data)
+    print(data)
     #build_chart(recs)
 
     
@@ -308,7 +378,29 @@ def test5():
     #print("Rec cnt", len(array["date"]))    
     print("Done")    
 
+def germ_test():
+    # germ
+    
+    print("Test Germination Data:")
+    tc = ChartHelper()
+    array = tc.get_germination()
+    print(array)
+    #print("Rec cnt", len(array["date"]))    
+    print("Done")    
+
+def planting_test():
+    # germ
+    
+    print("Test Planting Data:")
+    tc = ChartHelper()
+    array = tc.get_planting()
+    print(array)
+    #print("Rec cnt", len(array["date"]))    
+    print("Done")    
+
 
 if __name__=="__main__":
-    test5()
+    germ_test()
+    #planting_test()
+    
 

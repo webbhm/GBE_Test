@@ -15,7 +15,7 @@ from datetime import datetime
 from bson.json_util import dumps, loads
 
 # logon string to get into the database
-url = 'mongodb+srv://<.........>x.mongodb.net/test'
+url = 'mongodb+srv://webbhm:sHzHKD9_vZUGCZ4@gbe-d.cc79x.mongodb.net/test'
 
 # Source directories for data files, not used here
 DIR = "/home/pi/python/Mongo/"
@@ -370,6 +370,86 @@ def PhenoPivot():
     print(file_name)
     save(file_name, recs)    
     
+def Growth_Rate():
+    '''
+    Summarize and Pivot growth obsv to the week and attribute
+    Add dimension calculations
+    Pivot to week
+    '''
+    # Select pheontype records for a trial
+    match = {"$match":{
+           "location.school":"OpenAgBloom",
+           "location.field":"GBE_D_3",
+           "trial":"GBE_T1",
+           "activity_type": "Phenotype_Observation",           
+           "status.status_qualifier":"Test",
+           "subject.attribute.name":{"$in":["Height", "Length", "Width"]}
+         }}
+    
+    # Group by attribute and week, aggregate and summarize
+    group = {"$group":{"_id":{"School":"$location.school",
+                              "Field":"$location.field",
+                              "Plot":"$location.plot",
+                              "Trial":"$trial",
+                              #"Attrib":"$subject.attribute.name",
+                              "GBE_Id":"$subject.GBE_Id",
+                              "type":"$subject.type",
+                              "Week":"$time.week"},
+                   "items":{"$addToSet":{
+                   "name":"$subject.attribute.name",
+                   "values":{
+                       "Avg":{"$avg":"$subject.attribute.value"},
+                       "Min":{"$min":"$subject.attribute.value"},
+                       "Max":{"$max":"$subject.attribute.value"}
+                       }
+                   }}}}
+    
+    # Pivot the attributes together by week
+    project = {"$project":
+        {"Plant":{"$arrayToObject":{
+            "$zip":{"inputs":["$items.name", "$items.values"]}
+            }}}}
+    
+    # Add dimension and slope (rate of growth)
+    af = {"$addFields":{
+                 "Plant.Dimension":{"$multiply":["$Plant.Height.Avg", "$Plant.Width.Avg", "$Plant.Length.Avg"]},
+                 "Plant.Slope":{"$divide":[{"$multiply":["$Plant.Height.Avg", "$Plant.Width.Avg", "$Plant.Length.Avg"]}, 28]},
+                 }}    
+    
+    # Group and array by week
+    group2 = {"$group":{"_id":{"School":"$_id.School",
+                              "Field":"$_id.Field",
+                              "Plot":"$_id.Plot",
+                              "Trial":"$_id.Trial",
+                              "Attrib":"$_id.Attrib",
+                              "GBE_Id":"$_id.GBE_Id",
+                              "type":"$_id.type"},
+                   "Measurments":{"$addToSet":{
+                   "Week":{"$toString":"$_id.Week"},
+                   "values":"$Plant"
+                   }}}
+              }
+    
+    # Pivot week to the trial level
+    project2 = {"$project":
+        {"Week":{"$arrayToObject":{
+            "$zip":{"inputs":["$Measurments.Week", "$Measurments.values"]}
+            }}}}    
+
+    
+   
+    sort = {"$sort":{"_id.Week":1, "_id.Plot":1}}    
+    
+    #q = [match]
+    #q = [match, group]
+    #q = [match, group, project]
+    #q = [match, group, project, af]
+    #q = [match, group, project, af, group2]        
+    #q = [match, group, project, af, group2, project2]    
+    q = [match, group, project, af, group2, project2, sort]    
+    
+    recs = query(q)
+    return recs    
                 
 def Pivot3():
     '''
@@ -475,7 +555,8 @@ def Planting():
                               "Attrib":"$subject.attribute.name",
                               "GBE_Id":"$subject.GBE_Id",
                               "type":"$subject.type"},
-                "planting_date":{"$first":"$time.timestamp"},
+                #"time.planting_date_str":{"$dateToString":{"format":"%Y-%m-%d %H:%M:%S", "date":{"$first":"$time.timestamp"}}},
+                "planting_date":{"$first":"$time.timestamp"},                       
                 "seeds_planted":{"$sum":"$subject.attribute.value"},
                    }}
     
@@ -483,10 +564,11 @@ def Planting():
             
     q = [match, group, sort2]    
     recs = query(q)
-    file_name = DIR + "PlantingRpt.txt"
-    save(file_name, recs)    
+    return recs
+    #file_name = DIR + "PlantingRpt.txt"
+    #save(file_name, recs)    
     
-def Germ():
+def Germination():
     '''
     Get first germination data and total number germinated
     Could probably combine this with planting by getting all attributes and pivoting
@@ -502,26 +584,53 @@ def Germ():
            #"subject.attribute.name":"Temperature"
          }}
     
-    sort = {"$sort":{"time.day":1}}    
+    addF = {"$addFields":
+            {"plot.id":"$location.plot",
+             "plot.plant.name":"$subject.type",
+             "plot.plant.id":"$subject.GBE_Id",
+             "plot.time":"$time",
+             }}
     
+    
+    sort = {"$sort":{"time.day":1}}    
+    # group by plot
     group = {"$group":{"_id":{"School":"$location.school",
                               "Field":"$location.field",
                               "Plot":"$location.plot",
                               "Trial":"$trial",
                               "Attrib":"$subject.attribute.name",
-                              "GBE_Id":"$subject.GBE_Id",
-                              "type":"$_id.type"
+                              #"GBE_Id":"$subject.GBE_Id",
+                              #"type":"$_id.type"
                               },
-                "first_germination_date":{"$first":"$time.timestamp"},
+                "plot":{"$first":"$plot"},
+                #"time":{"$first":"$time"},
+                #"first_germination_date_str":{"$dateToString":{"format":"%Y-%m-%d %H:%M:%S", "date":{"$first":"$time.timestamp"}}},                       
                 "total_seeds_germinated":{"$sum":"$subject.attribute.value"},
                    }}
+    # put count inside plot
+    addF2 = {"$addFields":
+            {"plot.germinated":"$total_seeds_germinated",
+             }}
+    
+
+
+    unset = {"$unset":[
+        "total_seeds_germinated",
+        ]}    
     
     sort2 = {"$sort":{"_id.Plot":1}}        
             
-    q = [match, sort, group, sort2]    
+    #q = [match]
+    #q = [match, sort, group]
+    #q = [match, sort, addF, group]
+    #q = [match, sort, addF, group, addF2, unset]
+    q = [match, sort, addF, group, addF2, unset, sort2]            
     recs = query(q)
-    file_name = DIR + "GermRpt.txt"
-    save(file_name, recs)    
+    #file_name = DIR + "GermRpt.txt"
+    #for rec in recs:
+    #    pprint(rec)
+    #save(file_name, recs)
+    return recs
     
 def lookup():
     # Join between two tables observation and trial
@@ -658,8 +767,34 @@ def update():
 
     mu = MongoUtil()    
     status = mu.update(db, col, find, update)
-    print("Update",status)    
+    print("Update",status)
     
+def planting_test():
+    print("Planting Test")
+    recs = Planting()
+    for rec in recs:
+        pprint(rec)
+    #file_name = DIR + "PlantingRpt.txt"
+    #save(file_name, recs)
+    print("Done")
+
+def Growth_Rate_Test():
+    print("Growth Rate Test")
+    recs = Growth_Rate()
+    for rec in recs:
+        pprint(rec)
+    #file_name = DIR + "PlantingRpt.txt"
+    #save(file_name, recs)
+    print("Done")
+    
+def germ_test():
+    print("Germination Test")
+    recs = Germination()
+    for rec in recs:
+        pprint(rec)
+    #file_name = DIR + "PlantingRpt.txt"
+    #save(file_name, recs)
+    print("Done")        
     
 if __name__=="__main__":
     #testEnvSummary()
@@ -667,8 +802,9 @@ if __name__=="__main__":
     #AgroPivot()
     #PhenoPivot()
     #ObsvByPerson()
-    #Germ()
-    #Planting()
+    #germ_test()
+    #planting_test()
     #test2()
-    update()
+    #update()
+    Growth_Rate_Test()
     print("Finished")

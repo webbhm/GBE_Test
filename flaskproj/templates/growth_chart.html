@@ -13,6 +13,15 @@ Ver: 0.0</br>
 <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
 
 <script>
+colors = [{"bgc":"rgba(255,0,0,1.0)", "bc":"rgba(255,0,0,0.1)"},
+	{"bgc":"rgba(0,255,0,1.0)", "bc":"rgba(0,255,0,0.1)"},
+	{"bgc":"rgba(0,0,255,1.0)", "bc":"rgba(0,0,255,0.1)"},
+	{"bgc":"rgba(255,255,0,1.0)", "bc":"rgba(255,255,0,0.1)"},
+	{"bgc":"rgba(255,0,255,1.0)", "bc":"rgba(255,0,255,0.1)"},
+	{"bgc":"rgba(0,255,255,1.0)", "bc":"rgba(0,255,255,0.1)"},
+        ]
+
+
 
 new Chart(document.getElementById("myChart"), {
   type: "line",
@@ -25,8 +34,8 @@ datasets: [
       label: "{{data.chart_data[x].plot}}",
       fill: false,
       //lineTension: 0,
-      backgroundColor: "rgba(0,0,255,1.0)",
-      borderColor: "rgba(0,0,255,0.1)",
+      backgroundColor: colors[{{x}}].bgc,
+      borderColor: colors[{{x}}].bc,
       data: {{data.chart_data[x].plant.growth}},
       yAxisID: 'y',
     },

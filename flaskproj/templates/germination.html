@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Germination</title>
+</head>
+<body>
+
+<h1>Germination</h1>
+<p>
+Farm: {{data.location.farm}}</br>
+Field: {{data.location.field}}</br>
+Trial: {{data.trial}}</br>
+Trial Start Date: {{data.time.start_date_str}}</br>
+</p>
+<p>ver: 0.5</p>
+<p>Number Plots: {{data.rec|length}}</p>
+<table>
+  <tr>
+   <th>Plot</th>
+   <th>Plant Id</th>
+   <th>Name</th>
+   <th>Germination Day</th>
+   <th>Number Germinated</th>
+  </tr>
+{%for i in range(0, data.rec|length)%}
+  <tr>
+   <td>{{data.rec[i].id}}</td>
+   <td>{{data.rec[i].plant.id}}</td>
+   <td>{{data.rec[i].plant.name}}</td>
+   <td>{{data.rec[i].time.day}}</td>
+   <td>{{data.rec[i].germinated}}</td>
+  </tr>
+{% endfor %}    
+</table>
+
+</body>
+</html> 

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>-->
+<body>
+<h1>Growth Rate Chart</h1>
+Farm: {{data.location.farm}}</br>
+Field: {{data.location.field}}</br>
+Trial: {{data.trial}}</br>
+Trial Start Date: {{data.time.start_date_str}}</br>
+Ver: 0.0</br>
+
+<canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+
+<script>
+
+new Chart(document.getElementById("myChart"), {
+  type: "line",
+  data: {
+    labels: {{data.chart_time}},
+
+datasets: [
+      {%for x in range(0, data.chart_data|length) %}	
+      {
+      label: "{{data.chart_data[x].plot}}",
+      fill: false,
+      //lineTension: 0,
+      backgroundColor: "rgba(0,0,255,1.0)",
+      borderColor: "rgba(0,0,255,0.1)",
+      data: {{data.chart_data[x].plant.growth}},
+      yAxisID: 'y',
+    },
+  {% endfor %}
+    ]
+  },
+   options: {       legend: {
+            display: true,
+            labels: {
+                boxWidth: 14, 
+            }
+        },
+       title: {
+          display: true,
+          text: 'Temperature - Last 24 Hours',
+          fontSize: 22,
+          fontStyle: 'bold'
+      
+       },    
+       scales: {
+	     yAxes: [{ticks: {min: 15, max:100}}],
+         y: {
+           title:{'text':'mm3/week', 'display': true},
+           type: 'linear',
+           display: true,
+           position: 'left',
+           scaleLabel: {
+    			display: true,
+      			labelString: 'Temp C',
+                fontStyle: 'bold'
+                },
+           },
+     }, // yAxes    
+     xAxes: [{
+                scaleLabel: {
+        			display: true,
+        			labelString: 'Time',
+                    fontStyle: 'bold'
+                },
+				title:{'text':'Time', 'display': true},                
+            },
+            
+            ], 
+		plugins: {
+            title: {
+                display: true,
+                text: "{{data.title}}"
+            }
+        }            
+
+       }, // options
+
+},  // chart
+);
+</script>
+
+</body>
+</html>
